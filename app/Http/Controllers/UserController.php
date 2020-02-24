@@ -11,6 +11,9 @@ class UserController extends Controller
      * ログインアクション
      * 
      * @param Request
+     *  custNo      お客様番号
+     *  password    パスワード
+     * 
      * @return Response
      * 
      */
@@ -23,6 +26,7 @@ class UserController extends Controller
         $custNo = $request->input('custNo');
         $password = $request->input('password');
         Log::INFO('お客様番号：' . $custNo);
+        Log::DEBUG('パスワード：' . $password);
         
         /* DB問合せ */
         // DBからリクエストから取得したお客様番号のパスワードを取得
@@ -47,6 +51,8 @@ class UserController extends Controller
      * 残高照会アクション
      * 
      * @param Request
+     *  custNo      お客様番号
+     * 
      * @return Response
      * 
      */
@@ -66,7 +72,6 @@ class UserController extends Controller
         /* 業務ロジック */
 
         /* レスポンス作成 */
-
         return $user->AMOUNT;
     }
 
@@ -74,6 +79,8 @@ class UserController extends Controller
      * 取引履歴照会アクション
      * 
      * @param Request
+     *  custNo      お客様番号
+     * 
      * @return Response
      * 
      */
@@ -101,6 +108,9 @@ class UserController extends Controller
      * 預入アクション
      * 
      * @param Request
+     *  custNo      お客様番号
+     *  stockAmount 預入額
+     * 
      * @return Response
      * 
      */
@@ -113,7 +123,7 @@ class UserController extends Controller
         $custNo = $request->input('custNo');
         $stockAmount = $request->input('stockAmount');
         Log::INFO('お客様番号：' . $custNo);
-        Log::INFO('預入額：' . $stockAmount);
+        Log::DEBUG('預入額：' . $stockAmount);
 
         /* DB更新 */
         // DBの残高を取得
@@ -127,9 +137,19 @@ class UserController extends Controller
         Log::DEBUG('預入後残高：' . $user->AMOUNT);
 
         /* 業務ロジック */
+        // 取引履歴に追加
+        $historyId = \App\History::all()
+        ->max('HISTORY_ID');
+        Log::DEBUG('HISTORY_ID : ' . $historyId);
+
+        $history = new \App\History;
+        $history->HISTORY_ID = $historyId + 1;
+        $history->STOCK_AMOUNT = $stockAmount;
+        $history->CUST_NO = $custNo;
+        $history->save();
+        Log::INFO('取引履歴更新完了');
 
         /* レスポンス作成 */
-
         return $user->AMOUNT;
     }
 
@@ -137,6 +157,10 @@ class UserController extends Controller
      * 振込アクション
      * 
      * @param Request
+     *  custNo      お客様番号
+     *  sendAmount     振込額
+     *  sendCustNo      振込先お客様番号
+     * 
      * @return Response
      * 
      */
@@ -150,8 +174,8 @@ class UserController extends Controller
         $sendAmount = $request->input('sendAmount');
         $sendCustNo = $request->input('sendCustNo');
         Log::INFO('お客様番号：' . $custNo);
-        Log::INFO('振込額：' . $sendAmount);
-        Log::INFO('振込先：' . $sendCustNo);
+        Log::DEBUG('振込額：' . $sendAmount);
+        Log::DEBUG('振込先：' . $sendCustNo);
 
         /* DB更新 */
         // 振込元のDBの残高を更新
@@ -174,9 +198,19 @@ class UserController extends Controller
         Log::DEBUG('振込先の振込後残高：' . $sendUser->AMOUNT);
 
         /* 業務ロジック */
+        // 取引履歴に追加
+        $historyId = \App\History::all()
+        ->max('HISTORY_ID');
+        Log::DEBUG('HISTORY_ID : ' . $historyId);
+
+        $history = new \App\History;
+        $history->HISTORY_ID = $historyId + 1;
+        $history->DEPOSIT_AMOUNT = $sendAmount;
+        $history->CUST_NO = $custNo;
+        $history->save();
+        Log::INFO('取引履歴更新完了');
 
         /* レスポンス作成 */
-
         return $user->AMOUNT;
     }
 
