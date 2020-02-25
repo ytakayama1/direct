@@ -27,10 +27,15 @@ class UserController extends Controller
         $password = $request->input('password');
         Log::INFO('お客様番号：' . $custNo);
         Log::DEBUG('パスワード：' . $password);
+        // Log::DEBUG('リクエスト：' . $request);
         
         /* DB問合せ */
         // DBからリクエストから取得したお客様番号のパスワードを取得
-        $user = \App\User::find($custNo);
+        try{
+            $user = \App\User::find($custNo);
+        }catch(Exceptions $e){
+            Log::ERROR('ERROR:' + $e);
+        };
 
         /* 業務ロジック */        
         // 両者のパスワードを比較
@@ -56,7 +61,7 @@ class UserController extends Controller
      * @return Response
      * 
      */
-    public function showMoney(Request $request){
+    public function show(Request $request){
 
         Log::INFO('残高照会アクション実行');
 
@@ -68,7 +73,7 @@ class UserController extends Controller
         /* DB問合せ */
         // 取得したお客様番号の残高をDBから取得
         $user = \App\User::find($custNo);
-
+        
         /* 業務ロジック */
 
         /* レスポンス作成 */
@@ -97,60 +102,12 @@ class UserController extends Controller
         // 取得したお客様番号の取引履歴をDBから取得
         $histories = \App\History::where('CUST_NO', $custNo)
         ->get();
+        // Log::DEBUG('取引履歴：' + $histories);
 
         /* 業務ロジック */
 
         /* レスポンス作成 */
         return $histories;
-    }
-
-    /**
-     * 預入アクション
-     * 
-     * @param Request
-     *  custNo      お客様番号
-     *  stockAmount 預入額
-     * 
-     * @return Response
-     * 
-     */
-    public function stockMoney(Request $request){
-
-        Log::INFO('預入アクション実行');
-
-        /* リクエスト取得 */
-        // リクエストからお客様番号、預入額を取得
-        $custNo = $request->input('custNo');
-        $stockAmount = $request->input('stockAmount');
-        Log::INFO('お客様番号：' . $custNo);
-        Log::DEBUG('預入額：' . $stockAmount);
-
-        /* DB更新 */
-        // DBの残高を取得
-        $user = \App\User::find($custNo);
-        $stock = $user->AMOUNT;
-        Log::DEBUG('預入前残高：' . $stock);
-
-        // DBの残高を更新
-        $user->AMOUNT = $stock + $stockAmount;
-        $user->save();
-        Log::DEBUG('預入後残高：' . $user->AMOUNT);
-
-        /* 業務ロジック */
-        // 取引履歴に追加
-        $historyId = \App\History::all()
-        ->max('HISTORY_ID');
-        Log::DEBUG('HISTORY_ID : ' . $historyId);
-
-        $history = new \App\History;
-        $history->HISTORY_ID = $historyId + 1;
-        $history->STOCK_AMOUNT = $stockAmount;
-        $history->CUST_NO = $custNo;
-        $history->save();
-        Log::INFO('取引履歴更新完了');
-
-        /* レスポンス作成 */
-        return $user->AMOUNT;
     }
 
     /**
@@ -164,7 +121,7 @@ class UserController extends Controller
      * @return Response
      * 
      */
-    public function sendMoney(Request $request){
+    public function send(Request $request){
 
         Log::INFO('振込アクション実行');
 
@@ -214,4 +171,52 @@ class UserController extends Controller
         return $user->AMOUNT;
     }
 
+    /**
+     * 預入アクション
+     * 
+     * @param Request
+     *  custNo      お客様番号
+     *  stockAmount 預入額
+     * 
+     * @return Response
+     * 
+     */
+    public function stock(Request $request){
+
+        Log::INFO('預入アクション実行');
+
+        /* リクエスト取得 */
+        // リクエストからお客様番号、預入額を取得
+        $custNo = $request->input('custNo');
+        $stockAmount = $request->input('stockAmount');
+        Log::INFO('お客様番号：' . $custNo);
+        Log::DEBUG('預入額：' . $stockAmount);
+
+        /* DB更新 */
+        // DBの残高を取得
+        $user = \App\User::find($custNo);
+        $stock = $user->AMOUNT;
+        Log::DEBUG('預入前残高：' . $stock);
+
+        // DBの残高を更新
+        $user->AMOUNT = $stock + $stockAmount;
+        $user->save();
+        Log::DEBUG('預入後残高：' . $user->AMOUNT);
+
+        /* 業務ロジック */
+        // 取引履歴に追加
+        $historyId = \App\History::all()
+        ->max('HISTORY_ID');
+        Log::DEBUG('HISTORY_ID : ' . $historyId);
+
+        $history = new \App\History;
+        $history->HISTORY_ID = $historyId + 1;
+        $history->STOCK_AMOUNT = $stockAmount;
+        $history->CUST_NO = $custNo;
+        $history->save();
+        Log::INFO('取引履歴更新完了');
+
+        /* レスポンス作成 */
+        return $user->AMOUNT;
+    }
 }

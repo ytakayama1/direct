@@ -18,12 +18,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 /** ログイン */
-Route::post('/login', 'UserController@login');
+// Route::middleware('Cors')->post('/login', 'UserController@login');
+Route::match(["get", "post", "options"], "/login", "UserController@login");
 /** 残高照会 */
-Route::post('/showMoney', 'UserController@showMoney');
+Route::post('/show', 'UserController@show');
 /** 取引履歴 */
 Route::post('/history', 'UserController@history');
-/** 預入 */
-Route::post('/stockMoney', 'UserController@stockMoney');
 /** 振込 */
-Route::post('/sendMoney', 'UserController@sendMoney');
+Route::post('/send', 'UserController@send');
+/** 預入 */
+Route::post('/stock', 'UserController@stock');
