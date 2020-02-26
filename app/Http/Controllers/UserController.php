@@ -15,6 +15,7 @@ class UserController extends Controller
      *  password    パスワード
      * 
      * @return Response
+     *  result: success || false
      * 
      */
     public function login(Request $request){
@@ -37,19 +38,30 @@ class UserController extends Controller
             Log::ERROR('ERROR:' + $e);
         };
 
-        /* 業務ロジック */        
+        /* 業務ロジック */    
+        if($user == null){
+            Log::DEBUG('お客様番号が存在しません');
+            return response()->json([
+                'result' => 'false'
+                ]
+            );
+        }    
         // 両者のパスワードを比較
         if($password != $user->PASSWORD){
             Log::INFO('ログイン失敗：パスワード不一致');
             // パスワード不一致
-            return "NG";
+            return response()->json([
+                'result' => 'false'
+                ]
+            );
         }
 
         // パスワード一致
         Log::INFO('ログイン成功');
-
-        /* レスポンス作成 */
-        return "OK";
+        return response()->json([
+            'result' => 'success'
+            ]
+        );
     }
 
     /**
@@ -59,6 +71,15 @@ class UserController extends Controller
      *  custNo      お客様番号
      * 
      * @return Response
+     *  CUST_NO: 
+     *  NAME: 
+     *  PASSWORD: 
+     *  AMOUNT: 
+     *  REGISTED_CUST_1: 
+     *  REGISTED_CUST_2: 
+     *  REGISTED_CUST_3: 
+     *  REGISTED_CUST_4: 
+     *  REGISTED_CUST_5: 
      * 
      */
     public function show(Request $request){
@@ -77,7 +98,18 @@ class UserController extends Controller
         /* 業務ロジック */
 
         /* レスポンス作成 */
-        return $user->AMOUNT;
+        return response()->json([
+            'CUST_NO' => $user->CUST_NO, 
+            'NAME' => $user->NAME, 
+            'PASSWORD' => $user->PASSWORD,
+            'AMOUNT' => $user->AMOUNT,
+            'REGISTED_CUST_1' => $user->REGISTED_CUST_1, 
+            'REGISTED_CUST_2' => $user->REGISTED_CUST_2, 
+            'REGISTED_CUST_3' => $user->REGISTED_CUST_3, 
+            'REGISTED_CUST_4' => $user->REGISTED_CUST_4, 
+            'REGISTED_CUST_5' => $user->REGISTED_CUST_5, 
+            ]
+        );
     }
 
     /**
@@ -87,7 +119,15 @@ class UserController extends Controller
      *  custNo      お客様番号
      * 
      * @return Response
-     * 
+     * [
+     *  {
+     *   "HISTORY_ID":"",
+     *   "DATE":"",
+     *   "DEPOSIT_AMOUNT":"",
+     *   "STOCK_AMOUNT":"",
+     *   "CUST_NO":""
+     *  },
+     * ]
      */
     public function history(Request $request){
 
@@ -107,7 +147,8 @@ class UserController extends Controller
         /* 業務ロジック */
 
         /* レスポンス作成 */
-        return $histories;
+        // Log::DEBUG('json_encode($histories) : ' . json_encode($histories));
+        return json_encode($histories);
     }
 
     /**
@@ -155,17 +196,29 @@ class UserController extends Controller
         Log::DEBUG('振込先の振込後残高：' . $sendUser->AMOUNT);
 
         /* 業務ロジック */
-        // 取引履歴に追加
+        // 振込元の取引履歴を追加
         $historyId = \App\History::all()
         ->max('HISTORY_ID');
-        Log::DEBUG('HISTORY_ID : ' . $historyId);
+        Log::DEBUG('振込元追加時のHISTORY_ID : ' . $historyId);
 
         $history = new \App\History;
         $history->HISTORY_ID = $historyId + 1;
         $history->DEPOSIT_AMOUNT = $sendAmount;
         $history->CUST_NO = $custNo;
         $history->save();
-        Log::INFO('取引履歴更新完了');
+        Log::INFO('振込元取引履歴更新完了');
+
+        // 振込先の取引履歴を追加
+        $historyId = \App\History::all()
+        ->max('HISTORY_ID');
+        Log::DEBUG('振込先追加時のHISTORY_ID : ' . $historyId);
+
+        $history = new \App\History;
+        $history->HISTORY_ID = $historyId + 1;
+        $history->STOCK_AMOUNT = $sendAmount;
+        $history->CUST_NO = $sendCustNo;
+        $history->save();
+        Log::INFO('振込先取引履歴更新完了');
 
         /* レスポンス作成 */
         return $user->AMOUNT;
@@ -189,7 +242,7 @@ class UserController extends Controller
         // リクエストからお客様番号、預入額を取得
         $custNo = $request->input('custNo');
         $stockAmount = $request->input('stockAmount');
-        Log::INFO('お客様番号：' . $custNo);
+        Log::DEBUG('お客様番号：' . $custNo);
         Log::DEBUG('預入額：' . $stockAmount);
 
         /* DB更新 */
@@ -218,5 +271,43 @@ class UserController extends Controller
 
         /* レスポンス作成 */
         return $user->AMOUNT;
+    }
+
+    /**
+     * 登録済振込先情報取得アクション
+     * 
+     * @param Request
+     * @return Response
+     * {
+     *  REGISTED_CUST_1: "",
+     *  REGISTED_CUST_2: "",
+     *  REGISTED_CUST_3: "",
+     *  REGISTED_CUST_4: "",
+     *  REGISTED_CUST_5: ""
+     * }
+     */
+    public function getRegistedCust(Request $request){
+
+        Log::INFO('登録済振込先情報取得アクション実行');
+
+        /* リクエスト取得 */
+        // リクエストからお客様番号を取得
+        $custNo = $request->input('custNo');
+        Log::DEBUG('お客様番号：' . $custNo);
+        
+        /* DB問合せ */
+        // 登録済お客様番号を取得
+        $user = \App\User::find($custNo);
+
+        /* 業務ロジック */
+        /* レスポンス作成 */
+        return response()->json([
+            'REGISTED_CUST_1' => $user->REGISTED_CUST_1, 
+            'REGISTED_CUST_2' => $user->REGISTED_CUST_2, 
+            'REGISTED_CUST_3' => $user->REGISTED_CUST_3, 
+            'REGISTED_CUST_4' => $user->REGISTED_CUST_4, 
+            'REGISTED_CUST_5' => $user->REGISTED_CUST_5, 
+            ]
+        );
     }
 }

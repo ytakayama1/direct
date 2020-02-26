@@ -20,7 +20,7 @@ class Cors
         $response = $next($request);
         $httpOrigin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : "";
 
-        Log::DEBUG("httpOrigin : " . $httpOrigin);
+        // Log::DEBUG("httpOrigin : " . $httpOrigin);
 
         $response
             ->header('Access-Control-Allow-Origin', 'http://localhost:3000')

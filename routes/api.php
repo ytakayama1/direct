@@ -28,3 +28,5 @@ Route::post('/history', 'UserController@history');
 Route::post('/send', 'UserController@send');
 /** 預入 */
 Route::post('/stock', 'UserController@stock');
+/** 登録済振込先取得 */
+Route::post('/registedCust', 'UserController@getRegistedCust');
