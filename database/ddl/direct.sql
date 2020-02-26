@@ -1,0 +1,114 @@
+-- phpMyAdmin SQL Dump
+-- version 4.8.3
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: 
+-- サーバのバージョン： 10.1.36-MariaDB
+-- PHP Version: 7.2.10
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `direct`
+--
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `histories`
+--
+
+CREATE TABLE `histories` (
+  `HISTORY_ID` int(255) NOT NULL COMMENT '履歴ID',
+  `DATE` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '取引日付',
+  `DEPOSIT_AMOUNT` int(255) DEFAULT NULL COMMENT '引出額',
+  `STOCK_AMOUNT` int(255) DEFAULT NULL COMMENT '預入額',
+  `CUST_NO` int(255) NOT NULL COMMENT 'お客様番号'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- テーブルのデータのダンプ `histories`
+--
+
+INSERT INTO `histories` (`HISTORY_ID`, `DATE`, `DEPOSIT_AMOUNT`, `STOCK_AMOUNT`, `CUST_NO`) VALUES
+(1, '2020-02-22 16:41:06', 10000, NULL, 1722212),
+(2, '2020-02-22 16:41:06', NULL, 10000, 1722212),
+(3, '2020-02-24 02:14:32', NULL, 5000, 1722212),
+(4, '2020-02-24 02:17:25', 1000, NULL, 1722212),
+(5, '2020-02-24 02:18:14', 1000, NULL, 1722212),
+(6, '2020-02-25 15:21:17', 100000, NULL, 2222222),
+(7, '2020-02-25 15:21:17', NULL, 500000, 2222222),
+(8, '2020-02-26 06:16:17', 100, NULL, 2222222),
+(9, '2020-02-26 06:17:28', 2010, NULL, 2222222),
+(10, '2020-02-26 06:18:28', 900, NULL, 2222222),
+(11, '2020-02-26 06:23:08', 80, NULL, 2222222),
+(12, '2020-02-26 06:28:59', 20, NULL, 2222222),
+(13, '2020-02-26 06:30:59', 900, NULL, 2222222),
+(14, '2020-02-26 06:30:59', NULL, 900, 1722212),
+(15, '2020-02-26 06:31:59', 20, NULL, 1722212),
+(16, '2020-02-26 06:31:59', NULL, 20, 2222222),
+(17, '2020-02-26 06:51:15', 7000, NULL, 1722212),
+(18, '2020-02-26 06:51:15', NULL, 7000, 2222222),
+(19, '2020-02-26 06:54:33', 5020, NULL, 2222222),
+(20, '2020-02-26 06:54:33', NULL, 5020, 1722212),
+(21, '2020-02-26 06:55:40', 5020, NULL, 1722212),
+(22, '2020-02-26 06:55:40', NULL, 5020, 2222222),
+(23, '2020-02-26 06:58:40', 15000, NULL, 1722212),
+(24, '2020-02-26 06:58:40', NULL, 15000, 2222222);
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `users`
+--
+
+CREATE TABLE `users` (
+  `CUST_NO` int(255) NOT NULL COMMENT 'お客様番号',
+  `NAME` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '氏名',
+  `PASSWORD` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'パスワード',
+  `AMOUNT` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '残高',
+  `REGISTED_CUST_1` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '登録済み振込先１',
+  `REGISTED_CUST_2` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '登録済み振込先２',
+  `REGISTED_CUST_3` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '登録済み振込先３',
+  `REGISTED_CUST_4` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '登録済み振込先４',
+  `REGISTED_CUST_5` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '登録済み振込先５'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- テーブルのデータのダンプ `users`
+--
+
+INSERT INTO `users` (`CUST_NO`, `NAME`, `PASSWORD`, `AMOUNT`, `REGISTED_CUST_1`, `REGISTED_CUST_2`, `REGISTED_CUST_3`, `REGISTED_CUST_4`, `REGISTED_CUST_5`) VALUES
+(1722212, 'ytakayama', '1722212', '1015000', '2222222', '', '', '', ''),
+(2222222, 'kgomi', '2222222', '120020', '1722212', '', '', '', '');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `histories`
+--
+ALTER TABLE `histories`
+  ADD PRIMARY KEY (`HISTORY_ID`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`CUST_NO`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
